@@ -29,11 +29,11 @@ Ran test suite via command:
 .\venv\Scripts\python.exe -m pytest -v
 ```
 
-- **Total Test Cases**: 44
-- **Passed**: 44 (100%)
+- **Total Test Cases**: 50
+- **Passed**: 50 (100%)
 - **Failed**: 0
 - **Deprecation Warnings**: 0
-- **Execution Time**: ~7.5 seconds
+- **Execution Time**: ~11.2 seconds
 
 ### Test Suites Breakdown:
 1. `tests/test_features.py` (6 tests): Validates Shannon entropy, 20 lexical features, IP hostnames (with zero subdomains), shorteners, `@` symbol detection, and malformed URL safety.
@@ -44,6 +44,7 @@ Ran test suite via command:
 6. `tests/test_data_collector.py` (6 tests): Validates local offline ingestion, external feed fetching, network timeouts, and JSON lines deduplication.
 7. `tests/test_app.py` (17 tests): Validates Flask factory, web views, `/model`, `/health`, `/api/stats`, `/api/classify`, `/api/events` (including invalid/negative limits), `/api/model-info`, `/api/honeypot/login`, `/feedback` (resilient to bad parameters), proxy-forwarded IP extraction (`X-Forwarded-For`), 404 handler, and security headers.
 8. `tests/test_integration_flow.py` (1 test): Validates the full 10-step end-to-end lifecycle from URL input to analyst feedback approval.
+9. `tests/test_vercel_deployment.py` (6 tests): Validates `api/index.py` entrypoint export, `DEPLOYMENT_MODE=vercel` path configuration, health endpoint heuristic mode, serverless route smoke testing, JSON classification, and honeypot authentication under serverless conditions.
 
 ---
 

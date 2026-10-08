@@ -20,17 +20,20 @@ def analyze_honeypot_behavior(db_path=None) -> Dict[str, Any]:
     - User Agent bot vs browser categorization
     - Credential pattern analysis (common usernames, injection markers)
     """
-    conn = get_db_connection(db_path)
-    cursor = conn.cursor()
+    try:
+        conn = get_db_connection(db_path)
+        cursor = conn.cursor()
 
-    cursor.execute('''
-        SELECT id, timestamp, event_type, source_ip, user_agent, route,
-               request_method, username_or_identifier, metadata, risk_score
-        FROM honeypot_events
-        ORDER BY id ASC
-    ''')
-    rows = [dict(r) for r in cursor.fetchall()]
-    conn.close()
+        cursor.execute('''
+            SELECT id, timestamp, event_type, source_ip, user_agent, route,
+                   request_method, username_or_identifier, metadata, risk_score
+            FROM honeypot_events
+            ORDER BY id ASC
+        ''')
+        rows = [dict(r) for r in cursor.fetchall()]
+        conn.close()
+    except Exception:
+        rows = []
 
     total_events = len(rows)
     if total_events == 0:

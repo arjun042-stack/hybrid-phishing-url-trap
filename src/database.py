@@ -17,6 +17,13 @@ from typing import Dict, Any, List, Optional
 DEFAULT_DB_PATH = Path(__file__).resolve().parent.parent / 'instance' / 'honeypot_logs.db'
 
 
+def get_default_db_path() -> Path:
+    """Return default SQLite path based on deployment mode (local vs vercel serverless)."""
+    if os.environ.get('DEPLOYMENT_MODE', '').lower() == 'vercel':
+        return Path(os.environ.get('VERCEL_DB_PATH', '/tmp/honeypot_logs.db'))
+    return DEFAULT_DB_PATH
+
+
 def hash_identifier(value: str) -> str:
     """Create a secure SHA-256 hash digest for sensitive telemetry such as passwords."""
     if not value:
@@ -26,8 +33,11 @@ def hash_identifier(value: str) -> str:
 
 def get_db_connection(db_path: Optional[Path] = None) -> sqlite3.Connection:
     """Return a sqlite3 connection configured with Row factory."""
-    target_path = Path(db_path) if db_path else DEFAULT_DB_PATH
-    target_path.parent.mkdir(parents=True, exist_ok=True)
+    target_path = Path(db_path) if db_path else get_default_db_path()
+    try:
+        target_path.parent.mkdir(parents=True, exist_ok=True)
+    except OSError:
+        pass
     conn = sqlite3.connect(str(target_path))
     conn.row_factory = sqlite3.Row
     return conn
@@ -35,81 +45,85 @@ def get_db_connection(db_path: Optional[Path] = None) -> sqlite3.Connection:
 
 def init_db(db_path: Optional[Path] = None) -> None:
     """Initialize database tables safely if they do not already exist."""
-    conn = get_db_connection(db_path)
-    cursor = conn.cursor()
+    try:
+        conn = get_db_connection(db_path)
+        cursor = conn.cursor()
 
-    # 1. Backward-compatible login_attempt table
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS login_attempt (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
-            ip VARCHAR(50),
-            user_agent VARCHAR(200),
-            username VARCHAR(100),
-            password VARCHAR(100)
-        )
-    ''')
+        # 1. Backward-compatible login_attempt table
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS login_attempt (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+                ip VARCHAR(50),
+                user_agent VARCHAR(200),
+                username VARCHAR(100),
+                password VARCHAR(100)
+            )
+        ''')
 
-    # 2. Comprehensive Honeypot events table
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS honeypot_events (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
-            event_type VARCHAR(50) NOT NULL,
-            source_ip VARCHAR(50),
-            user_agent VARCHAR(255),
-            route VARCHAR(255),
-            request_method VARCHAR(10),
-            username_or_identifier VARCHAR(100),
-            password_fingerprint VARCHAR(64),
-            metadata TEXT,
-            risk_score REAL DEFAULT 0.0
-        )
-    ''')
+        # 2. Comprehensive Honeypot events table
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS honeypot_events (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+                event_type VARCHAR(50) NOT NULL,
+                source_ip VARCHAR(50),
+                user_agent VARCHAR(255),
+                route VARCHAR(255),
+                request_method VARCHAR(10),
+                username_or_identifier VARCHAR(100),
+                password_fingerprint VARCHAR(64),
+                metadata TEXT,
+                risk_score REAL DEFAULT 0.0
+            )
+        ''')
 
-    # 3. URL Classification events table
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS classification_events (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
-            url TEXT NOT NULL,
-            prediction VARCHAR(20) NOT NULL,
-            confidence REAL NOT NULL,
-            risk_level VARCHAR(20) NOT NULL,
-            features TEXT,
-            source_ip VARCHAR(50)
-        )
-    ''')
+        # 3. URL Classification events table
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS classification_events (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+                url TEXT NOT NULL,
+                prediction VARCHAR(20) NOT NULL,
+                confidence REAL NOT NULL,
+                risk_level VARCHAR(20) NOT NULL,
+                features TEXT,
+                source_ip VARCHAR(50)
+            )
+        ''')
 
-    # 4. Controlled Feedback loop table (pending / approved / rejected)
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS feedback_samples (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
-            url TEXT NOT NULL UNIQUE,
-            suggested_label INTEGER NOT NULL,
-            reviewer_label INTEGER,
-            status VARCHAR(20) DEFAULT 'pending',
-            notes TEXT
-        )
-    ''')
+        # 4. Controlled Feedback loop table (pending / approved / rejected)
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS feedback_samples (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+                url TEXT NOT NULL UNIQUE,
+                suggested_label INTEGER NOT NULL,
+                reviewer_label INTEGER,
+                status VARCHAR(20) DEFAULT 'pending',
+                notes TEXT
+            )
+        ''')
 
-    # 5. Model versioning table
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS model_versions (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            version_tag VARCHAR(50) NOT NULL,
-            trained_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-            accuracy REAL,
-            precision REAL,
-            recall REAL,
-            f1_score REAL,
-            model_path TEXT
-        )
-    ''')
+        # 5. Model versioning table
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS model_versions (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                version_tag VARCHAR(50) NOT NULL,
+                trained_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                accuracy REAL,
+                precision REAL,
+                recall REAL,
+                f1_score REAL,
+                model_path TEXT
+            )
+        ''')
 
-    conn.commit()
-    conn.close()
+        conn.commit()
+        conn.close()
+    except Exception as e:
+        import logging
+        logging.getLogger(__name__).warning("Database initialization could not complete: %s", e)
 
 
 def log_honeypot_interaction(
@@ -190,66 +204,80 @@ def log_classification_event(
 
 def get_dashboard_statistics(db_path: Optional[Path] = None) -> Dict[str, Any]:
     """Retrieve aggregate statistics from the database for the threat dashboard."""
-    conn = get_db_connection(db_path)
-    cursor = conn.cursor()
+    try:
+        conn = get_db_connection(db_path)
+        cursor = conn.cursor()
 
-    # Classification metrics
-    cursor.execute("SELECT COUNT(*) FROM classification_events")
-    total_urls = cursor.fetchone()[0]
+        # Classification metrics
+        cursor.execute("SELECT COUNT(*) FROM classification_events")
+        total_urls = cursor.fetchone()[0]
 
-    cursor.execute("SELECT COUNT(*) FROM classification_events WHERE prediction = 'PHISHING'")
-    phishing_count = cursor.fetchone()[0]
+        cursor.execute("SELECT COUNT(*) FROM classification_events WHERE prediction = 'PHISHING'")
+        phishing_count = cursor.fetchone()[0]
 
-    cursor.execute("SELECT COUNT(*) FROM classification_events WHERE prediction = 'SAFE'")
-    safe_count = cursor.fetchone()[0]
+        cursor.execute("SELECT COUNT(*) FROM classification_events WHERE prediction = 'SAFE'")
+        safe_count = cursor.fetchone()[0]
 
-    cursor.execute("SELECT COUNT(*) FROM classification_events WHERE prediction = 'SUSPICIOUS'")
-    suspicious_count = cursor.fetchone()[0]
+        cursor.execute("SELECT COUNT(*) FROM classification_events WHERE prediction = 'SUSPICIOUS'")
+        suspicious_count = cursor.fetchone()[0]
 
-    # Honeypot interactions
-    cursor.execute("SELECT COUNT(*) FROM honeypot_events")
-    total_honeypot_events = cursor.fetchone()[0]
+        # Honeypot interactions
+        cursor.execute("SELECT COUNT(*) FROM honeypot_events")
+        total_honeypot_events = cursor.fetchone()[0]
 
-    # Top attacking IPs
-    cursor.execute('''
-        SELECT source_ip, COUNT(*) as count
-        FROM honeypot_events
-        GROUP BY source_ip
-        ORDER BY count DESC
-        LIMIT 5
-    ''')
-    top_ips = [dict(row) for row in cursor.fetchall()]
+        # Top attacking IPs
+        cursor.execute('''
+            SELECT source_ip, COUNT(*) as count
+            FROM honeypot_events
+            GROUP BY source_ip
+            ORDER BY count DESC
+            LIMIT 5
+        ''')
+        top_ips = [dict(row) for row in cursor.fetchall()]
 
-    # Recent honeypot events
-    cursor.execute('''
-        SELECT id, timestamp, event_type, source_ip, user_agent, route, username_or_identifier, risk_score
-        FROM honeypot_events
-        ORDER BY id DESC
-        LIMIT 10
-    ''')
-    recent_honeypot = [dict(row) for row in cursor.fetchall()]
+        # Recent honeypot events
+        cursor.execute('''
+            SELECT id, timestamp, event_type, source_ip, user_agent, route, username_or_identifier, risk_score
+            FROM honeypot_events
+            ORDER BY id DESC
+            LIMIT 10
+        ''')
+        recent_honeypot = [dict(row) for row in cursor.fetchall()]
 
-    # Recent classification events
-    cursor.execute('''
-        SELECT id, timestamp, url, prediction, confidence, risk_level, source_ip
-        FROM classification_events
-        ORDER BY id DESC
-        LIMIT 10
-    ''')
-    recent_classifications = [dict(row) for row in cursor.fetchall()]
+        # Recent classification events
+        cursor.execute('''
+            SELECT id, timestamp, url, prediction, confidence, risk_level, source_ip
+            FROM classification_events
+            ORDER BY id DESC
+            LIMIT 10
+        ''')
+        recent_classifications = [dict(row) for row in cursor.fetchall()]
 
-    conn.close()
+        conn.close()
 
-    return {
-        'total_urls': total_urls,
-        'phishing_count': phishing_count,
-        'safe_count': safe_count,
-        'suspicious_count': suspicious_count,
-        'honeypot_interactions': total_honeypot_events,
-        'top_ips': top_ips,
-        'recent_honeypot': recent_honeypot,
-        'recent_classifications': recent_classifications
-    }
+        return {
+            'total_urls': total_urls,
+            'phishing_count': phishing_count,
+            'safe_count': safe_count,
+            'suspicious_count': suspicious_count,
+            'honeypot_interactions': total_honeypot_events,
+            'top_ips': top_ips,
+            'recent_honeypot': recent_honeypot,
+            'recent_classifications': recent_classifications
+        }
+    except Exception as e:
+        import logging
+        logging.getLogger(__name__).warning("Could not query dashboard statistics: %s", e)
+        return {
+            'total_urls': 0,
+            'phishing_count': 0,
+            'safe_count': 0,
+            'suspicious_count': 0,
+            'honeypot_interactions': 0,
+            'top_ips': [],
+            'recent_honeypot': [],
+            'recent_classifications': []
+        }
 
 
 def add_feedback_sample(

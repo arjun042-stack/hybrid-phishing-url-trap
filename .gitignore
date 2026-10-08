@@ -91,3 +91,8 @@ data/ingested/
 # =========================
 .DS_Store
 Thumbs.db
+
+# =========================
+# Deployment Tools
+# =========================
+.vercel/

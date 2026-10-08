@@ -60,7 +60,14 @@ def create_app(test_config: Dict[str, Any] = None) -> Flask:
     # Configuration & Hardening
     app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'phish-sentinel-defensive-secret-key-2026')
     app.config['MAX_CONTENT_LENGTH'] = 2 * 1024 * 1024  # 2 MB max payload size
-    app.config['DB_PATH'] = PROJECT_ROOT / 'instance' / 'honeypot_logs.db'
+
+    deployment_mode = os.environ.get('DEPLOYMENT_MODE', 'local').lower()
+    app.config['DEPLOYMENT_MODE'] = deployment_mode
+
+    if deployment_mode == 'vercel':
+        app.config['DB_PATH'] = Path(os.environ.get('VERCEL_DB_PATH', '/tmp/honeypot_logs.db'))
+    else:
+        app.config['DB_PATH'] = PROJECT_ROOT / 'instance' / 'honeypot_logs.db'
 
     if test_config:
         app.config.update(test_config)
@@ -85,6 +92,15 @@ def create_app(test_config: Dict[str, Any] = None) -> Flask:
             "font-src 'self' https: data:;"
         )
         return response
+
+    # Global Template Context Processor
+    @app.context_processor
+    def inject_deployment_context():
+        clf = getattr(app, 'classifier', None)
+        return {
+            'deployment_mode': app.config.get('DEPLOYMENT_MODE', 'local'),
+            'is_model_loaded': bool(clf and clf.is_loaded)
+        }
 
     # ---------------------------------------------------------
     # Frontend Routes
@@ -319,12 +335,14 @@ def create_app(test_config: Dict[str, Any] = None) -> Flask:
             db_ok = False
 
         clf = get_classifier()
-        is_healthy = db_ok and clf.is_loaded
+        is_vercel = app.config.get('DEPLOYMENT_MODE') == 'vercel'
+        is_healthy = db_ok and (clf.is_loaded or is_vercel)
 
         status_code = 200 if is_healthy else 503
         return jsonify({
             'status': 'healthy' if is_healthy else 'degraded',
             'model_loaded': clf.is_loaded,
+            'deployment_mode': app.config.get('DEPLOYMENT_MODE', 'local'),
             'database': db_ok,
             'version': clf.metadata.get('version', '1.0.0')
         }), status_code
@@ -363,9 +381,12 @@ def create_app(test_config: Dict[str, Any] = None) -> Flask:
     return app
 
 
+# Application instance for WSGI servers & Vercel serverless runtime
+app = create_app()
+
+
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     debug_mode = os.environ.get('FLASK_DEBUG', 'False').lower() in ('true', '1')
-    application = create_app()
     print(f"[*] Starting Hybrid Phishing URL Trap on http://127.0.0.1:{port} (Debug: {debug_mode})")
-    application.run(host='127.0.0.1', port=port, debug=debug_mode)
+    app.run(host='127.0.0.1', port=port, debug=debug_mode)

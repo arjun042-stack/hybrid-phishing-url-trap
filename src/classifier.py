@@ -7,6 +7,7 @@ and risk level classification for the Hybrid Phishing URL Trap.
 
 import json
 import logging
+import os
 from pathlib import Path
 from typing import Dict, Any, Optional
 from urllib.parse import urlparse
@@ -19,11 +20,18 @@ from src.features import extract_features, FEATURE_NAMES, LEGACY_FEATURE_NAMES
 logger = logging.getLogger(__name__)
 
 # Search paths for trained model file
-DEFAULT_MODEL_PATHS = [
-    Path(__file__).resolve().parent.parent / 'models' / 'model.joblib',
-    Path(__file__).resolve().parent.parent / 'classifier' / 'model.joblib',
-    Path(__file__).resolve().parent.parent / 'model.joblib'
-]
+def get_model_search_paths() -> list:
+    paths = []
+    if os.environ.get('MODEL_PATH'):
+        paths.append(Path(os.environ['MODEL_PATH']))
+    paths.extend([
+        Path(__file__).resolve().parent.parent / 'models' / 'model.joblib',
+        Path(__file__).resolve().parent.parent / 'classifier' / 'model.joblib',
+        Path(__file__).resolve().parent.parent / 'model.joblib'
+    ])
+    return paths
+
+DEFAULT_MODEL_PATHS = get_model_search_paths()
 
 DEFAULT_METADATA_PATHS = [
     Path(__file__).resolve().parent.parent / 'models' / 'model_metadata.json',
@@ -140,18 +148,39 @@ class URLClassifier:
 
         # Fallback heuristic if model is not loaded
         if not self.is_loaded:
-            is_suspicious = (
+            is_phishing = (
+                features['is_ip'] == 1 and features['has_suspicious_keyword'] == 1
+            ) or (
+                features['has_at'] == 1 and features['num_dots'] > 2
+            )
+            is_suspicious = is_phishing or (
                 features['is_ip'] == 1 or
                 features['has_suspicious_keyword'] == 1 or
                 features['is_shortened'] == 1 or
                 features['has_at'] == 1
             )
-            prediction = "SUSPICIOUS" if is_suspicious else "SAFE"
+            if is_phishing:
+                prediction = "PHISHING"
+                risk_level = "HIGH"
+                confidence = 0.85
+                prob = 0.85
+            elif is_suspicious:
+                prediction = "SUSPICIOUS"
+                risk_level = "MEDIUM"
+                confidence = 0.60
+                prob = 0.60
+            else:
+                prediction = "SAFE"
+                risk_level = "LOW"
+                confidence = 0.80
+                prob = 0.10
+
             return {
                 "url": url_clean,
                 "prediction": prediction,
-                "confidence": 0.50,
-                "risk_level": "MEDIUM" if is_suspicious else "LOW",
+                "confidence": confidence,
+                "risk_level": risk_level,
+                "phishing_probability": prob,
                 "features": features,
                 "model_version": "heuristic-fallback",
                 "warning": "ML model file not loaded. Running in heuristic fallback mode."

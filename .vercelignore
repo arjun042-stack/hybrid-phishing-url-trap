@@ -1,0 +1,47 @@
+# ========================================================
+# Vercel Deployment Ignore Rules
+# ========================================================
+
+# 1. Ignore legacy classifier to prevent dual-app detection
+# Only root app.py should be deployed
+classifier/
+
+# 2. Ignore Node / npm artifacts
+package-lock.json
+
+# 3. Virtual environments
+venv/
+.venv/
+env/
+
+# 4. Tests and test cache
+tests/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# 5. Local databases and instance directory
+instance/
+*.db
+*.sqlite
+*.sqlite3
+
+# 6. Large datasets and training scripts
+data/
+train.py
+inference.py
+*.csv
+*.xlsx
+
+# 7. Bytecode and caches
+__pycache__/
+*.py[cod]
+*$py.class
+
+# 8. Local Git and IDE configurations
+.git/
+.github/
+.vscode/
+.idea/
+.DS_Store
+*.log
