@@ -1,0 +1,172 @@
+{% extends "base.html" %}
+
+{% block title %}Feedback Loop{% endblock %}
+{% block breadcrumb %}CONTROLLED RETRAINING FEEDBACK LOOP{% endblock %}
+
+{% block content %}
+<!-- Header Bar -->
+<div class="hud-card-header" style="margin-bottom: 24px;">
+    <div>
+        <h2 style="font-size: 1.6rem; font-weight: 800; letter-spacing: -0.5px;">
+            🔁 Controlled Retraining Feedback Loop
+        </h2>
+        <p style="color: var(--text-secondary); font-size: 0.88rem; margin-top: 4px;">
+            Human-in-the-loop candidate review quarantine preventing adversarial model poisoning.
+        </p>
+    </div>
+    <span class="cyber-badge badge-cyan">ANTI-POISONING DEFENSE</span>
+</div>
+
+<!-- Architecture Quarantine Diagram -->
+<div class="hud-card hud-bracketed" style="margin-bottom: 24px;">
+    <div class="hud-card-title" style="margin-bottom: 8px;">
+        <span class="icon">🛡️</span> ANTI-POISONING STAGING PROTOCOL
+    </div>
+    <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 18px;">
+        Honeypot lures and flagged URLs are never directly injected into training data. Instead, they enter a quarantined staging queue as <code>pending</code> samples. A security analyst must audit and approve them before retraining ingestion.
+    </p>
+
+    <div class="cyber-architecture-hero" style="padding: 18px;">
+        <div class="arch-nodes-container">
+            <div class="arch-node active">
+                <div class="arch-node-badge">🪤</div>
+                <div class="arch-node-title">1. CAPTURE</div>
+                <div class="arch-node-desc">Decoy honeypot lure</div>
+            </div>
+
+            <div class="arch-node trap">
+                <div class="arch-node-badge">⏳</div>
+                <div class="arch-node-title">2. QUARANTINE</div>
+                <div class="arch-node-desc">Pending candidate state</div>
+            </div>
+
+            <div class="arch-node active">
+                <div class="arch-node-badge">👨‍💻</div>
+                <div class="arch-node-title">3. ANALYST AUDIT</div>
+                <div class="arch-node-desc">Human-in-the-loop review</div>
+            </div>
+
+            <div class="arch-node intel">
+                <div class="arch-node-badge">✅</div>
+                <div class="arch-node-title">4. APPROVE / REJECT</div>
+                <div class="arch-node-desc">Zero false data injection</div>
+            </div>
+
+            <div class="arch-node active">
+                <div class="arch-node-badge">🔄</div>
+                <div class="arch-node-title">5. RETRAINING</div>
+                <div class="arch-node-desc">Validated model update</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Stage New Candidate Form -->
+<div class="hud-card hud-bracketed" style="margin-bottom: 24px;">
+    <div class="hud-card-header">
+        <div class="hud-card-title">
+            <span class="icon">➕</span> STAGE NEW CANDIDATE URL FOR REVIEW
+        </div>
+    </div>
+
+    <form action="/feedback" method="POST" style="display: flex; gap: 12px; flex-wrap: wrap;">
+        <input type="hidden" name="action" value="add">
+        <input type="text" name="url" class="cyber-input" placeholder="https://suspicious-sample.org/login" required style="flex: 2; min-width: 280px;">
+        
+        <select name="suggested_label" class="cyber-input" style="flex: 1; min-width: 160px;">
+            <option value="1">Suggest: Phishing (1)</option>
+            <option value="0">Suggest: Legitimate (0)</option>
+        </select>
+        
+        <button type="submit" class="cyber-btn cyber-btn-primary" style="white-space: nowrap;">
+            STAGE SAMPLE
+        </button>
+    </form>
+</div>
+
+<!-- Quarantined Candidate Review Table -->
+<div class="hud-card hud-bracketed">
+    <div class="hud-card-header">
+        <div class="hud-card-title">
+            <span class="icon">📋</span> CANDIDATE REVIEW QUEUE
+        </div>
+        <div style="font-family: var(--font-mono); font-size: 0.8rem; color: var(--text-muted);">
+            {{ samples|length }} sample(s) queued
+        </div>
+    </div>
+
+    {% if samples %}
+        <div class="table-responsive">
+            <table class="cyber-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Queued Date</th>
+                        <th>Target URL</th>
+                        <th>Suggested</th>
+                        <th>Status</th>
+                        <th>Analyst Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for s in samples %}
+                    <tr>
+                        <td class="cell-mono">#{{ s.id }}</td>
+                        <td class="cell-timestamp">{{ s.timestamp }}</td>
+                        <td class="cell-mono cell-truncate" style="max-width: 320px;">
+                            {{ s.url }}
+                        </td>
+                        <td>
+                            {% if s.suggested_label == 1 %}
+                                <span class="cyber-badge badge-phishing">PHISHING (1)</span>
+                            {% else %}
+                                <span class="cyber-badge badge-safe">SAFE (0)</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if s.status == 'approved' %}
+                                <span class="cyber-badge badge-safe">APPROVED</span>
+                            {% elif s.status == 'rejected' %}
+                                <span class="cyber-badge badge-phishing">REJECTED</span>
+                            {% else %}
+                                <span class="cyber-badge badge-suspicious">PENDING REVIEW</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if s.status == 'pending' %}
+                            <div style="display: flex; gap: 8px;">
+                                <form action="/feedback" method="POST" style="margin: 0; display: inline;">
+                                    <input type="hidden" name="action" value="update">
+                                    <input type="hidden" name="sample_id" value="{{ s.id }}">
+                                    <input type="hidden" name="status" value="approved">
+                                    <input type="hidden" name="reviewer_label" value="{{ s.suggested_label }}">
+                                    <button type="submit" class="cyber-btn cyber-btn-primary cyber-btn-sm" style="padding: 4px 10px;">
+                                        APPROVE
+                                    </button>
+                                </form>
+                                <form action="/feedback" method="POST" style="margin: 0; display: inline;">
+                                    <input type="hidden" name="action" value="update">
+                                    <input type="hidden" name="sample_id" value="{{ s.id }}">
+                                    <input type="hidden" name="status" value="rejected">
+                                    <button type="submit" class="cyber-btn cyber-btn-danger cyber-btn-sm" style="padding: 4px 10px;">
+                                        REJECT
+                                    </button>
+                                </form>
+                            </div>
+                            {% else %}
+                                <span class="cell-mono" style="font-size: 0.78rem; color: var(--text-muted);">RESOLVED</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="empty-state">
+            <div class="empty-state-icon">✅</div>
+            <p>Review queue is clear! No pending candidate samples.</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

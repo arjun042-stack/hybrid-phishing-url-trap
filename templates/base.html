@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Operations Center{% endblock %} | PHISH//TRAP Threat Intel</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    {% block head %}{% endblock %}
+</head>
+<body>
+    <div class="app-container">
+        <!-- =================================================================
+             CYBERSECURITY FIXED SIDEBAR NAVIGATION
+             ================================================================= -->
+        <aside class="cyber-sidebar" id="cyberSidebar">
+            <div class="sidebar-header">
+                <div class="brand-shield">🛡️</div>
+                <div class="brand-info">
+                    <span class="brand-title">PHISH<span>//</span>TRAP</span>
+                    <span class="brand-tagline">AI PHISHING DEFENSE</span>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <span class="nav-section-title">Operations</span>
+                <a href="/" class="nav-link {% if request.path == '/' %}active{% endif %}">
+                    <span class="nav-icon">⌂</span>
+                    <span>Overview</span>
+                </a>
+                <a href="/classify" class="nav-link {% if request.path == '/classify' %}active{% endif %}">
+                    <span class="nav-icon">🔍</span>
+                    <span>URL Analyzer</span>
+                    <span class="nav-badge">AI</span>
+                </a>
+                <a href="/login" class="nav-link {% if request.path == '/login' %}active{% endif %}">
+                    <span class="nav-icon">🪤</span>
+                    <span>Honeypot Trap</span>
+                    <span class="nav-badge">DECOY</span>
+                </a>
+
+                <span class="nav-section-title">Threat Intel</span>
+                <a href="/dashboard" class="nav-link {% if request.path == '/dashboard' %}active{% endif %}">
+                    <span class="nav-icon">📊</span>
+                    <span>Threat Intelligence</span>
+                </a>
+                <a href="/model" class="nav-link {% if request.path == '/model' %}active{% endif %}">
+                    <span class="nav-icon">🧠</span>
+                    <span>ML Model Telemetry</span>
+                </a>
+                <a href="/feedback" class="nav-link {% if request.path == '/feedback' %}active{% endif %}">
+                    <span class="nav-icon">🔁</span>
+                    <span>Feedback Loop</span>
+                </a>
+                <a href="/report" class="nav-link {% if request.path == '/report' %}active{% endif %}">
+                    <span class="nav-icon">📋</span>
+                    <span>Intrusion Logs</span>
+                </a>
+            </nav>
+
+            <!-- Bottom System Telemetry HUD -->
+            <div class="sidebar-status-widget">
+                <div class="status-row">
+                    <span class="status-label">SYSTEM</span>
+                    <span class="status-indicator">
+                        <span class="status-dot pulse"></span> ONLINE
+                    </span>
+                </div>
+                <div class="status-row">
+                    <span class="status-label">ML MODEL</span>
+                    <span class="status-indicator">
+                        <span class="status-dot cyan pulse"></span> RANDOM FOREST
+                    </span>
+                </div>
+                <div class="status-row">
+                    <span class="status-label">DATABASE</span>
+                    <span class="status-indicator">
+                        <span class="status-dot"></span> CONNECTED
+                    </span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- =================================================================
+             TOPBAR STATUS & COMMAND BAR
+             ================================================================= -->
+        <div class="cyber-main-wrapper">
+            <header class="cyber-topbar">
+                <div class="topbar-left">
+                    <button class="menu-toggle-btn" id="menuToggleBtn" aria-label="Toggle Navigation">
+                        ☰
+                    </button>
+                    <div class="soc-title-wrap">
+                        <span class="soc-indicator-pill">
+                            <span class="status-dot pulse"></span> SOC ACTIVE
+                        </span>
+                        <span class="soc-breadcrumb">
+                            SEC-OPS <span>//</span> <strong>{% block breadcrumb %}MONITOR{% endblock %}</strong>
+                        </span>
+                    </div>
+                </div>
+
+                <div class="topbar-right">
+                    <div class="live-clock-pill">
+                        <span>🕒</span>
+                        <span id="socLiveClock">--:--:-- UTC</span>
+                    </div>
+
+                    <div class="defcon-badge elevated">
+                        <span>⚡</span>
+                        <span>DEFCON: ELEVATED</span>
+                    </div>
+
+                    <a href="/classify" class="cyber-btn cyber-btn-primary cyber-btn-sm">
+                        + SCAN URL
+                    </a>
+                </div>
+            </header>
+
+            <!-- Content Canvas -->
+            <main class="cyber-content">
+                <div class="cyber-disclaimer-banner">
+                    <span>⚠️</span>
+                    <div>
+                        <strong>EDUCATIONAL & DEFENSIVE RESEARCH PLATFORM:</strong> Demonstrates hybrid Machine Learning classification and deceptive honeypot telemetry logging. Never enter authentic credentials.
+                    </div>
+                </div>
+
+                {% block content %}{% endblock %}
+            </main>
+
+            <!-- SOC Footer -->
+            <footer class="cyber-footer">
+                <div>
+                    <strong>Hybrid Phishing URL Trap</strong> &bull; Machine Learning & Honeypot Cyber Defense Lab
+                </div>
+                <div>
+                    Zero-Trust Telemetry &bull; Isolated Honeypot Decoy &bull; SEC-OPS v1.2
+                </div>
+            </footer>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

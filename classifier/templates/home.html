@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>AI-Based URL Classifier & Honeypot</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(120deg, #2980b9, #8e44ad); /* Vibrant gradient background */
+            color: #fff; /* White text for contrast */
+            text-align: center;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            font-size: 3.5rem;
+            margin-bottom: 40px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            letter-spacing: 1px;
+        }
+
+        .links {
+            margin-top: 40px;
+        }
+
+        .links a {
+            display: inline-block;
+            margin: 20px;
+            padding: 18px 36px;
+            font-size: 1.5rem;
+            background-color: rgba(255, 255, 255, 0.15); /* Semi-transparent white background */
+            color: #fff;
+            text-decoration: none;
+            border-radius: 10px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            transition: background-color 0.3s ease, transform 0.2s ease-in-out;
+        }
+
+        .links a:hover {
+            background-color: rgba(255, 255, 255, 0.3);
+            transform: scale(1.05);
+        }
+
+        .footer {
+            margin-top: 80px;
+            font-size: 1.1rem;
+            color: rgba(255, 255, 255, 0.7);
+            font-style: italic;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Subtle animation for the heading */
+        h1 {
+            animation: fadeInHeading 1s ease-out;
+        }
+
+        @keyframes fadeInHeading {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Animation for the links appearing */
+        .links a {
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUpLink 0.6s ease-out forwards;
+        }
+
+        .links a:nth-child(1) {
+            animation-delay: 0.2s;
+        }
+
+        .links a:nth-child(2) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes fadeInUpLink {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>PhishTrap Sentinel</h1>
+    <h2>AI-powered URL defense & dynamic login intrusion trap</h2>
+    <div class="links">
+        <a href="/classify">🔍 URL Classifier</a>
+        <a href="/login">🛡️ Honeypot Login</a>
+    </div>
+    <div class="footer">
+        &copy; 2025 CyberSec Lab
+    </div>
+</body>
+</html>

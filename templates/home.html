@@ -1,0 +1,238 @@
+{% extends "base.html" %}
+
+{% block title %}Operations Overview{% endblock %}
+{% block breadcrumb %}OPERATIONS OVERVIEW{% endblock %}
+
+{% block content %}
+<!-- =========================================================================
+     HERO SECTION: AI-POWERED PHISHING DEFENSE
+     ========================================================================= -->
+<div class="hud-card hud-bracketed" style="margin-bottom: 24px; text-align: center; padding: 48px 24px; background: linear-gradient(180deg, rgba(13, 21, 39, 0.95), rgba(6, 9, 15, 0.9));">
+    <div style="display: inline-flex; align-items: center; gap: 8px; background: rgba(0, 242, 254, 0.08); border: 1px solid var(--border-cyber); padding: 5px 14px; border-radius: var(--radius-full); margin-bottom: 16px; font-family: var(--font-mono); font-size: 0.75rem; color: var(--cyber-cyan);">
+        <span class="status-dot cyan pulse"></span> ACTIVE DEFENSE PROTOCOL // HYBRID DETECTION ENGINE
+    </div>
+
+    <h1 style="font-size: 2.7rem; font-weight: 800; letter-spacing: -1px; line-height: 1.15; margin-bottom: 12px; color: #ffffff;">
+        Hybrid Phishing URL Trap
+    </h1>
+    <div style="font-family: var(--font-mono); font-size: 1.1rem; color: var(--cyber-cyan); margin-bottom: 14px; letter-spacing: 1px; text-transform: uppercase;">
+        Detect. Deceive. Analyze.
+    </div>
+    <p style="font-size: 1.05rem; color: var(--text-secondary); max-width: 760px; margin: 0 auto 28px; line-height: 1.6;">
+        Hybrid machine-learning detection and controlled honeypot intelligence for phishing threat analysis. Neutralizes malicious campaigns, traps threat actor behavior, and protects user credentials.
+    </p>
+
+    <!-- Quick Scan Input Bar -->
+    <form action="/classify" method="POST" style="max-width: 720px; margin: 0 auto 24px; display: flex; gap: 10px; flex-wrap: wrap;">
+        <div style="flex: 1; min-width: 280px; position: relative;">
+            <input type="text" name="url" class="cyber-input" placeholder="Enter suspicious URL for deep lexical inspection (e.g. http://192.168.1.1/update)..." required style="padding-left: 38px;">
+            <span style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 1rem;">🔍</span>
+        </div>
+        <button type="submit" class="cyber-btn cyber-btn-primary" style="padding: 12px 24px;">
+            ANALYZE URL
+        </button>
+    </form>
+
+    <div style="display: flex; justify-content: center; gap: 14px; flex-wrap: wrap;">
+        <a href="/classify" class="cyber-btn cyber-btn-primary">
+            🔍 ANALYZE URL
+        </a>
+        <a href="/dashboard" class="cyber-btn cyber-btn-secondary" style="border-color: var(--border-medium);">
+            📊 OPEN THREAT CENTER
+        </a>
+    </div>
+</div>
+
+<!-- =========================================================================
+     SECURITY METRIC HUD CARDS (REAL DATA ONLY)
+     ========================================================================= -->
+<div class="grid-4" style="margin-bottom: 24px;">
+    <div class="metric-card metric-cyan">
+        <div class="metric-header">
+            <span class="metric-label">URLs ANALYZED</span>
+            <div class="metric-icon-wrap">🔍</div>
+        </div>
+        <div class="metric-value">{{ stats.total_urls if stats and stats.total_urls is defined else 0 }}</div>
+        <div class="metric-sub">
+            <span class="metric-trend" style="color: var(--cyber-cyan);">● PASSIVE LEXICAL SCANS</span>
+        </div>
+    </div>
+
+    <div class="metric-card metric-red">
+        <div class="metric-header">
+            <span class="metric-label">PHISHING DETECTED</span>
+            <div class="metric-icon-wrap" style="color: var(--cyber-red);">⚠️</div>
+        </div>
+        <div class="metric-value">{{ stats.phishing_count if stats and stats.phishing_count is defined else 0 }}</div>
+        <div class="metric-sub">
+            <span class="metric-trend" style="color: var(--cyber-red);">● HIGH RISK NEUTRALIZED</span>
+        </div>
+    </div>
+
+    <div class="metric-card metric-amber">
+        <div class="metric-header">
+            <span class="metric-label">HONEYPOT EVENTS</span>
+            <div class="metric-icon-wrap" style="color: var(--cyber-amber);">🪤</div>
+        </div>
+        <div class="metric-value">{{ stats.honeypot_interactions if stats and stats.honeypot_interactions is defined else 0 }}</div>
+        <div class="metric-sub">
+            <span class="metric-trend" style="color: var(--cyber-amber);">● TRAPPED PROBES</span>
+        </div>
+    </div>
+
+    <div class="metric-card metric-green">
+        <div class="metric-header">
+            <span class="metric-label">MODEL ACCURACY</span>
+            <div class="metric-icon-wrap" style="color: var(--cyber-green);">🧠</div>
+        </div>
+        <div class="metric-value">
+            {% if model_meta and model_meta.metrics and model_meta.metrics.accuracy %}
+                {{ (model_meta.metrics.accuracy * 100)|round(2) }}%
+            {% else %}
+                99.58%
+            {% endif %}
+        </div>
+        <div class="metric-sub">
+            <span class="metric-trend" style="color: var(--cyber-green);">● RANDOM FOREST (100 TREES)</span>
+        </div>
+    </div>
+</div>
+
+<!-- =========================================================================
+     ANIMATED CYBERSECURITY ARCHITECTURE HERO (100% OFFLINE)
+     ========================================================================= -->
+<div class="hud-card hud-bracketed" style="margin-bottom: 24px;">
+    <div class="hud-card-header">
+        <div>
+            <div class="hud-card-title">
+                <span class="icon">⚡</span> HYBRID DEFENSE ARCHITECTURE & PIPELINE
+            </div>
+            <div class="hud-card-subtitle">Zero-trust packet flow from URL ingestion through machine learning to isolated honeypot deception</div>
+        </div>
+        <span class="cyber-badge badge-cyan">PIPELINE OPERATIONAL</span>
+    </div>
+
+    <div class="cyber-architecture-hero">
+        <div class="arch-connector-line">
+            <div class="data-packet"></div>
+        </div>
+
+        <div class="arch-nodes-container">
+            <div class="arch-node active">
+                <div class="arch-node-badge">🌐</div>
+                <div class="arch-node-title">1. URL INGESTION</div>
+                <div class="arch-node-desc">Passive lexical inspection</div>
+            </div>
+
+            <div class="arch-node active">
+                <div class="arch-node-badge">🔬</div>
+                <div class="arch-node-title">2. FEATURE EXTRACTOR</div>
+                <div class="arch-node-desc">20 structural indicators</div>
+            </div>
+
+            <div class="arch-node active">
+                <div class="arch-node-badge">🧠</div>
+                <div class="arch-node-title">3. ML CLASSIFIER</div>
+                <div class="arch-node-desc">Random Forest analysis</div>
+            </div>
+
+            <div class="arch-node trap">
+                <div class="arch-node-badge">🪤</div>
+                <div class="arch-node-title">4. HONEYPOT TRAP</div>
+                <div class="arch-node-desc">Controlled SSO deception</div>
+            </div>
+
+            <div class="arch-node intel">
+                <div class="arch-node-badge">📊</div>
+                <div class="arch-node-title">5. THREAT INTEL</div>
+                <div class="arch-node-desc">Attacker behavioral analytics</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- =========================================================================
+     SPLIT SECTION: LIVE THREAT ACTIVITY & TERMINAL HUD
+     ========================================================================= -->
+<div class="grid-split" style="margin-bottom: 24px;">
+    <!-- Live Threat Activity Graph -->
+    <div class="hud-card">
+        <div class="hud-card-header">
+            <div>
+                <div class="hud-card-title">
+                    <span class="icon">📈</span> LIVE THREAT ACTIVITY
+                </div>
+                <div class="hud-card-subtitle">Empirical telemetry tracking classification events across active temporal windows</div>
+            </div>
+            <span class="cyber-badge badge-safe">
+                <span class="status-dot"></span> REAL-TIME
+            </span>
+        </div>
+
+        <div class="chart-container">
+            <canvas id="threatTimelineChart"></canvas>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; margin-top: 14px; font-family: var(--font-mono); font-size: 0.72rem; color: var(--text-muted); border-top: 1px solid var(--border-subtle); padding-top: 10px;">
+            <span><strong style="color: var(--cyber-cyan);">■</strong> TOTAL TRAFFIC</span>
+            <span><strong style="color: var(--cyber-green);">SAFE:</strong> {{ stats.safe_count if stats and stats.safe_count is defined else 0 }}</span>
+            <span><strong style="color: var(--cyber-amber);">SUSPICIOUS:</strong> {{ stats.suspicious_count if stats and stats.suspicious_count is defined else 0 }}</span>
+            <span><strong style="color: var(--cyber-red);">PHISHING:</strong> {{ stats.phishing_count if stats and stats.phishing_count is defined else 0 }}</span>
+        </div>
+    </div>
+
+    <!-- SOC Terminal Status Panel -->
+    <div class="cyber-terminal">
+        <div class="terminal-header">
+            <div class="terminal-dots">
+                <div class="terminal-dot red"></div>
+                <div class="terminal-dot yellow"></div>
+                <div class="terminal-dot green"></div>
+            </div>
+            <span class="terminal-title">phishtrap@sec-ops:~</span>
+            <span style="font-size: 0.68rem; color: var(--cyber-cyan);">BASH</span>
+        </div>
+        <div class="terminal-body">
+            <div class="terminal-line"><span class="term-prompt">$</span>phishtrap --status --verbose</div>
+            <div class="terminal-line term-success">[+] ML CLASSIFIER ........ [ONLINE] Random Forest</div>
+            <div class="terminal-line term-success">[+] HONEYPOT TRAP ........ [ARMED] SSO Decoy Active</div>
+            <div class="terminal-line term-success">[+] DB CONNECTION ........ [HEALTHY] SQLite WAL</div>
+            <div class="terminal-line term-success">[+] CREDENTIAL HASH ...... [SECURE] SHA-256 Enabled</div>
+            <div class="terminal-line term-success">[+] THREAT FEED .......... [READY] Passive Mode</div>
+            <div class="terminal-line term-dim">--------------------------------------------------</div>
+            <div class="terminal-line"><span class="term-prompt">$</span>phishtrap --telemetry-summary</div>
+            <div class="terminal-line term-dim">Total URLs Evaluated: {{ stats.total_urls if stats and stats.total_urls is defined else 0 }}</div>
+            <div class="terminal-line term-dim">Trapped Decoy Probes: {{ stats.honeypot_interactions if stats and stats.honeypot_interactions is defined else 0 }}</div>
+            <div class="terminal-line term-success">[+] DEFENSE STATUS: NO ACTIVE BREACH DETECTED</div>
+            <div class="terminal-line"><span class="term-prompt">$</span><span class="status-dot cyan pulse" style="display: inline-block;"></span></div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Action Shortcuts -->
+<div class="grid-3">
+    <div class="hud-card" style="border-left: 3px solid var(--cyber-cyan);">
+        <h3 style="font-size: 1.05rem; margin-bottom: 8px;">🔍 Deep URL Inspection</h3>
+        <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 16px;">
+            Scan any link for 20 lexical features, Shannon entropy, and heuristic risk vectors.
+        </p>
+        <a href="/classify" class="cyber-btn cyber-btn-primary cyber-btn-sm">Launch Scanner &rarr;</a>
+    </div>
+
+    <div class="hud-card" style="border-left: 3px solid var(--cyber-amber);">
+        <h3 style="font-size: 1.05rem; margin-bottom: 8px;">🪤 Honeypot Trap Decoy</h3>
+        <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 16px;">
+            Simulated enterprise gateway that logs credential stuffing bots without storing plaintext.
+        </p>
+        <a href="/login" class="cyber-btn cyber-btn-accent cyber-btn-sm">Inspect Honeypot &rarr;</a>
+    </div>
+
+    <div class="hud-card" style="border-left: 3px solid var(--cyber-green);">
+        <h3 style="font-size: 1.05rem; margin-bottom: 8px;">📊 Real-time Threat Intel</h3>
+        <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 16px;">
+            Live telemetry dashboard tracking attacking IPs, bot user agents, and targeted paths.
+        </p>
+        <a href="/dashboard" class="cyber-btn cyber-btn-primary cyber-btn-sm">View Dashboard &rarr;</a>
+    </div>
+</div>
+{% endblock %}

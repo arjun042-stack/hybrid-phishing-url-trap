@@ -1,0 +1,100 @@
+{
+  "version": "1.0.0",
+  "trained_at": "2026-10-08 06:34:36Z",
+  "algorithm": "RandomForestClassifier(n_estimators=100)",
+  "random_state": 42,
+  "sample_size": 50000,
+  "train_samples": 40000,
+  "test_samples": 10000,
+  "feature_names": [
+    "length",
+    "num_dots",
+    "has_at",
+    "has_https",
+    "num_hyphens",
+    "num_digits",
+    "domain_length",
+    "path_length",
+    "num_slashes",
+    "num_question_marks",
+    "num_equals",
+    "num_ampersands",
+    "num_percent",
+    "num_subdomains",
+    "is_ip",
+    "is_shortened",
+    "has_suspicious_keyword",
+    "path_depth",
+    "entropy",
+    "num_special_chars"
+  ],
+  "label_mapping": {
+    "0": "SAFE",
+    "1": "PHISHING"
+  },
+  "metrics": {
+    "accuracy": 0.9953,
+    "precision": 0.9966,
+    "recall": 0.992,
+    "f1_score": 0.9943,
+    "confusion_matrix": [
+      [
+        5861,
+        14
+      ],
+      [
+        33,
+        4092
+      ]
+    ],
+    "classification_report": {
+      "SAFE": {
+        "precision": 0.994401085850017,
+        "recall": 0.9976170212765958,
+        "f1-score": 0.9960064576429604,
+        "support": 5875.0
+      },
+      "PHISHING": {
+        "precision": 0.9965903555772041,
+        "recall": 0.992,
+        "f1-score": 0.9942898797229984,
+        "support": 4125.0
+      },
+      "accuracy": 0.9953,
+      "macro avg": {
+        "precision": 0.9954957207136106,
+        "recall": 0.9948085106382979,
+        "f1-score": 0.9951481686829794,
+        "support": 10000.0
+      },
+      "weighted avg": {
+        "precision": 0.9953041596124819,
+        "recall": 0.9953,
+        "f1-score": 0.995298369250976,
+        "support": 10000.0
+      }
+    }
+  },
+  "feature_importances": {
+    "has_https": 0.5006,
+    "num_slashes": 0.1292,
+    "path_length": 0.1237,
+    "num_digits": 0.0741,
+    "num_special_chars": 0.0485,
+    "length": 0.039,
+    "entropy": 0.0213,
+    "path_depth": 0.0162,
+    "domain_length": 0.0155,
+    "num_subdomains": 0.0107,
+    "num_dots": 0.0101,
+    "num_hyphens": 0.009,
+    "has_suspicious_keyword": 0.002,
+    "is_shortened": 0.0001,
+    "has_at": 0.0,
+    "num_question_marks": 0.0,
+    "num_equals": 0.0,
+    "num_ampersands": 0.0,
+    "num_percent": 0.0,
+    "is_ip": 0.0
+  }
+}

@@ -1,0 +1,116 @@
+<!doctype html>
+<html>
+<head>
+    <title>Honeypot Login</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #37474f, #263238); /* Dark blue-gray gradient */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            color: #eceff1; /* Light gray text */
+        }
+
+        h2 {
+            font-size: 2.8rem;
+            color: #b0bec5; /* Light blue-gray heading */
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.4);
+        }
+
+        form {
+            background: rgba(0, 0, 0, 0.3); /* Semi-transparent dark form background */
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.5);
+            width: 300px;
+            text-align: center;
+        }
+
+        input[name="username"],
+        input[name="password"] {
+            padding: 15px;
+            margin-bottom: 25px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            background: rgba(255, 255, 255, 0.1); /* Light semi-transparent input background */
+            color: #fff;
+            width: calc(100% - 30px); /* Adjust width for padding */
+        }
+
+        input::placeholder {
+            color: rgba(255, 255, 255, 0.5); /* Darker placeholder text */
+        }
+
+        button[type="submit"] {
+            background-color: #546e7a; /* Dark blue-gray button */
+            color: #fff;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            width: 100%;
+        }
+
+        button[type="submit"]:hover {
+            background-color: #455a64; /* Darker blue-gray on hover */
+        }
+
+        p {
+            font-size: 1rem;
+            color: #90a4ae; /* Medium gray text */
+            margin-top: 30px;
+            font-style: italic;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.4);
+        }
+
+        /* Subtle animation for the heading */
+        h2 {
+            animation: fadeInHeading 1s ease-out;
+        }
+
+        @keyframes fadeInHeading {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Subtle animation for the form */
+        form {
+            animation: fadeInUpForm 0.8s ease-out;
+        }
+
+        @keyframes fadeInUpForm {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body>
+    <h2>Login</h2>
+    <form method="post">
+        <input name="username" placeholder="Username"/><br/>
+        <input name="password" placeholder="Password" type="password"/><br/>
+        <button type="submit">Log In</button>
+    </form>
+    <p>Only attackers please 😉</p>
+</body>
+</html>

@@ -1,0 +1,328 @@
+{% extends "base.html" %}
+
+{% block title %}Threat Intelligence Center{% endblock %}
+{% block breadcrumb %}THREAT INTELLIGENCE CENTER{% endblock %}
+
+{% block content %}
+<!-- Header Bar -->
+<div class="hud-card-header" style="margin-bottom: 24px;">
+    <div>
+        <h2 style="font-size: 1.6rem; font-weight: 800; letter-spacing: -0.5px;">
+            📊 Threat Intelligence & Honeypot Telemetry
+        </h2>
+        <p style="color: var(--text-secondary); font-size: 0.88rem; margin-top: 4px;">
+            Real-time telemetry aggregation of passive URL classifications, honeypot decoy interactions, and threat actor behavior profiles.
+        </p>
+    </div>
+    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+        <a href="/dashboard" class="cyber-btn cyber-btn-sm" style="border-color: var(--border-medium);">
+            🔄 REFRESH TELEMETRY
+        </a>
+        <a href="/api/stats" target="_blank" class="cyber-btn cyber-btn-primary cyber-btn-sm">
+            📡 JSON API &rarr;
+        </a>
+    </div>
+</div>
+
+<!-- =========================================================================
+     TOP METRICS CARDS
+     ========================================================================= -->
+<div class="grid-4" style="margin-bottom: 24px;">
+    <div class="metric-card metric-cyan">
+        <div class="metric-header">
+            <span class="metric-label">TOTAL ANALYZED</span>
+            <div class="metric-icon-wrap">🔍</div>
+        </div>
+        <div class="metric-value">{{ stats.total_urls }}</div>
+        <div class="metric-sub">Passive lexical scans</div>
+    </div>
+
+    <div class="metric-card metric-red">
+        <div class="metric-header">
+            <span class="metric-label">PHISHING DETECTED</span>
+            <div class="metric-icon-wrap" style="color: var(--cyber-red);">🚩</div>
+        </div>
+        <div class="metric-value">{{ stats.phishing_count }}</div>
+        <div class="metric-sub">High-confidence lures</div>
+    </div>
+
+    <div class="metric-card metric-green">
+        <div class="metric-header">
+            <span class="metric-label">SAFE DESTINATIONS</span>
+            <div class="metric-icon-wrap" style="color: var(--cyber-green);">✓</div>
+        </div>
+        <div class="metric-value">{{ stats.safe_count }}</div>
+        <div class="metric-sub">Verified legitimate</div>
+    </div>
+
+    <div class="metric-card metric-amber">
+        <div class="metric-header">
+            <span class="metric-label">HONEYPOT TRAPS</span>
+            <div class="metric-icon-wrap" style="color: var(--cyber-amber);">🪤</div>
+        </div>
+        <div class="metric-value">{{ stats.honeypot_interactions }}</div>
+        <div class="metric-sub">Trapped intrusion attempts</div>
+    </div>
+</div>
+
+<!-- =========================================================================
+     THREAT DISTRIBUTION DONUT & ATTACKER BEHAVIOR SPLIT
+     ========================================================================= -->
+<div class="grid-2" style="margin-bottom: 24px;">
+    <!-- Threat Classification Distribution Donut -->
+    <div class="hud-card hud-bracketed">
+        <div class="hud-card-header">
+            <div>
+                <div class="hud-card-title">
+                    <span class="icon">🎯</span> THREAT DISTRIBUTION RATIO
+                </div>
+                <div class="hud-card-subtitle">Empirical breakdown across evaluated URLs</div>
+            </div>
+            <span class="cyber-badge badge-cyan">TELEMETRY</span>
+        </div>
+
+        <div style="display: flex; align-items: center; justify-content: space-around; flex-wrap: wrap; gap: 20px; padding: 10px 0;">
+            <div style="width: 200px; height: 200px; position: relative;">
+                <canvas id="threatDonutChart" 
+                    data-safe="{{ stats.safe_count }}" 
+                    data-suspicious="{{ stats.suspicious_count }}" 
+                    data-phishing="{{ stats.phishing_count }}">
+                </canvas>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 12px; font-family: var(--font-mono); font-size: 0.8rem;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="width: 12px; height: 12px; background: var(--cyber-green); border-radius: 2px;"></span>
+                    <span style="color: var(--text-secondary);">SAFE URLs:</span>
+                    <strong style="color: var(--text-primary);">{{ stats.safe_count }}</strong>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="width: 12px; height: 12px; background: var(--cyber-amber); border-radius: 2px;"></span>
+                    <span style="color: var(--text-secondary);">SUSPICIOUS:</span>
+                    <strong style="color: var(--text-primary);">{{ stats.suspicious_count }}</strong>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="width: 12px; height: 12px; background: var(--cyber-red); border-radius: 2px;"></span>
+                    <span style="color: var(--text-secondary);">PHISHING:</span>
+                    <strong style="color: var(--text-primary);">{{ stats.phishing_count }}</strong>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Attacker Behavior & Scanner Analysis -->
+    <div class="hud-card hud-bracketed">
+        <div class="hud-card-header">
+            <div>
+                <div class="hud-card-title">
+                    <span class="icon">🤖</span> ATTACKER BEHAVIOR & BOT ANALYSIS
+                </div>
+                <div class="hud-card-subtitle">User-Agent signature categorization & threat ratings</div>
+            </div>
+            <span class="cyber-badge badge-safe">HEURISTICS ACTIVE</span>
+        </div>
+
+        {% if analytics and analytics.total_events > 0 %}
+            <p style="font-size: 0.88rem; color: var(--text-secondary); margin-bottom: 16px;">
+                {{ analytics.summary }}
+            </p>
+
+            <div style="background: var(--bg-surface); border: 1px solid var(--border-subtle); padding: 14px 18px; border-radius: var(--radius-sm); margin-bottom: 18px;">
+                <div style="display: flex; justify-content: space-between; font-family: var(--font-mono); font-size: 0.8rem; margin-bottom: 8px;">
+                    <span style="color: var(--text-muted);">AUTOMATED SCANNERS / BOTS:</span>
+                    <strong style="color: var(--cyber-red);">{{ analytics.user_agent_breakdown.automated_scanners }}</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between; font-family: var(--font-mono); font-size: 0.8rem; margin-bottom: 8px;">
+                    <span style="color: var(--text-muted);">SIMULATED BROWSERS / PROBES:</span>
+                    <strong style="color: var(--cyber-cyan);">{{ analytics.user_agent_breakdown.simulated_browsers }}</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between; font-family: var(--font-mono); font-size: 0.8rem;">
+                    <span style="color: var(--text-muted);">AVERAGE THREAT RISK:</span>
+                    <strong style="color: var(--cyber-amber);">{{ (analytics.threat_summary.avg_risk_score * 100)|round(0) }}%</strong>
+                </div>
+            </div>
+
+            <div class="hud-card-subtitle" style="margin-bottom: 8px; font-weight: 700;">TOP TARGETED PROBE ROUTES:</div>
+            <div class="table-responsive">
+                <table class="cyber-table">
+                    <thead>
+                        <tr><th>Targeted Route</th><th>Hit Count</th></tr>
+                    </thead>
+                    <tbody>
+                        {% for r in analytics.targeted_routes %}
+                        <tr>
+                            <td class="cell-mono"><code>{{ r.route }}</code></td>
+                            <td><strong style="color: var(--cyber-cyan);">{{ r.count }}</strong></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <div class="empty-state-icon">📭</div>
+                <p>No honeypot events recorded yet.</p>
+                <p style="font-size: 0.8rem; margin-top: 4px; color: var(--text-muted);">
+                    Interact with the <a href="/login">Honeypot Trap</a> to capture telemetry.
+                </p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- =========================================================================
+     TOP ATTACKING SOURCE IPS
+     ========================================================================= -->
+<div class="hud-card hud-bracketed" style="margin-bottom: 24px;">
+    <div class="hud-card-header">
+        <div>
+            <div class="hud-card-title">
+                <span class="icon">🌐</span> TOP ATTACKING SOURCE IPs
+            </div>
+            <div class="hud-card-subtitle">Correlation of origin IP addresses probing the honeypot decoys</div>
+        </div>
+        <span class="cyber-badge badge-amber">SOURCE TELEMETRY</span>
+    </div>
+
+    {% if stats.top_ips %}
+        <div class="table-responsive">
+            <table class="cyber-table">
+                <thead>
+                    <tr>
+                        <th>Source IP Address</th>
+                        <th>Intrusion Probes</th>
+                        <th>Status Rating</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in stats.top_ips %}
+                    <tr>
+                        <td class="cell-mono" style="color: var(--cyber-cyan);">{{ item.source_ip }}</td>
+                        <td><strong>{{ item.count }} attempt(s)</strong></td>
+                        <td><span class="cyber-badge badge-suspicious">ACTIVE PROBE</span></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="empty-state">
+            <div class="empty-state-icon">🛡️</div>
+            <p>No attacker source IPs recorded yet.</p>
+        </div>
+    {% endif %}
+</div>
+
+<!-- =========================================================================
+     RECENT HONEYPOT TRAPPED INTRUSIONS TABLE
+     ========================================================================= -->
+<div class="hud-card hud-bracketed" style="margin-bottom: 24px;">
+    <div class="hud-card-header">
+        <div>
+            <div class="hud-card-title">
+                <span class="icon">🪤</span> RECENT HONEYPOT INTRUSION TELEMETRY
+            </div>
+            <div class="hud-card-subtitle">Detailed audit records of trapped bot credentials and probe paths</div>
+        </div>
+        <span class="cyber-badge badge-cyan">DECOY LOGS</span>
+    </div>
+
+    {% if stats.recent_honeypot %}
+        <div class="table-responsive">
+            <table class="cyber-table">
+                <thead>
+                    <tr>
+                        <th>Timestamp (UTC)</th>
+                        <th>Source IP</th>
+                        <th>Target Route</th>
+                        <th>Probed Username</th>
+                        <th>Risk Score</th>
+                        <th>User-Agent Signature</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for h in stats.recent_honeypot %}
+                    <tr>
+                        <td class="cell-timestamp">{{ h.timestamp }}</td>
+                        <td class="cell-mono">{{ h.source_ip }}</td>
+                        <td class="cell-mono"><code>{{ h.route }}</code></td>
+                        <td><strong style="color: var(--text-primary);">{{ h.username_or_identifier }}</strong></td>
+                        <td>
+                            <span class="cyber-badge {% if h.risk_score >= 0.7 %}badge-phishing{% else %}badge-suspicious{% endif %}">
+                                {{ (h.risk_score * 100)|round(0) }}%
+                            </span>
+                        </td>
+                        <td class="cell-truncate" style="font-size: 0.78rem; color: var(--text-muted);">
+                            {{ h.user_agent }}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="empty-state">
+            <div class="empty-state-icon">🪤</div>
+            <p>No honeypot events recorded yet.</p>
+        </div>
+    {% endif %}
+</div>
+
+<!-- =========================================================================
+     RECENT URL CLASSIFICATIONS TABLE
+     ========================================================================= -->
+<div class="hud-card hud-bracketed">
+    <div class="hud-card-header">
+        <div>
+            <div class="hud-card-title">
+                <span class="icon">🔍</span> RECENT URL CLASSIFICATION SCANS
+            </div>
+            <div class="hud-card-subtitle">Passive threat inspection audit history</div>
+        </div>
+        <span class="cyber-badge badge-safe">SCAN AUDIT</span>
+    </div>
+
+    {% if stats.recent_classifications %}
+        <div class="table-responsive">
+            <table class="cyber-table">
+                <thead>
+                    <tr>
+                        <th>Timestamp (UTC)</th>
+                        <th>Target Destination URL</th>
+                        <th>Verdict</th>
+                        <th>Risk Rating</th>
+                        <th>Model Confidence</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for c in stats.recent_classifications %}
+                    <tr>
+                        <td class="cell-timestamp">{{ c.timestamp }}</td>
+                        <td class="cell-mono cell-truncate">{{ c.url }}</td>
+                        <td>
+                            <span class="cyber-badge {% if c.prediction == 'PHISHING' %}badge-phishing{% elif c.prediction == 'SUSPICIOUS' %}badge-suspicious{% else %}badge-safe{% endif %}">
+                                {{ c.prediction }}
+                            </span>
+                        </td>
+                        <td style="font-weight: 700; color: {% if c.risk_level == 'HIGH' %}var(--cyber-red){% elif c.risk_level == 'MEDIUM' %}var(--cyber-amber){% else %}var(--cyber-green){% endif %};">
+                            {{ c.risk_level }}
+                        </td>
+                        <td class="cell-mono" style="color: var(--cyber-cyan);">
+                            {{ (c.confidence * 100)|round(1) }}%
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="empty-state">
+            <div class="empty-state-icon">🔎</div>
+            <p>No URLs analyzed yet.</p>
+            <p style="font-size: 0.8rem; margin-top: 4px; color: var(--text-muted);">
+                Test a URL on the <a href="/classify">URL Analyzer</a> page.
+            </p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

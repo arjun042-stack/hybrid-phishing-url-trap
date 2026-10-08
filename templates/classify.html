@@ -1,0 +1,277 @@
+{% extends "base.html" %}
+
+{% block title %}URL Threat Analyzer{% endblock %}
+{% block breadcrumb %}URL THREAT ANALYZER{% endblock %}
+
+{% block content %}
+<!-- =========================================================================
+     URL SCANNER INPUT CARD
+     ========================================================================= -->
+<div class="hud-card hud-bracketed" style="margin-bottom: 24px;">
+    <div class="hud-card-header">
+        <div>
+            <div class="hud-card-title">
+                <span class="icon">🔍</span> URL THREAT ANALYZER
+            </div>
+            <div class="hud-card-subtitle">
+                AI-Powered URL Phishing Classifier: Evaluates lexical & structural markers using a Random Forest model trained on empirical cybersecurity samples.
+            </div>
+        </div>
+        <span class="cyber-badge badge-cyan">PASSIVE ZERO-OUTBOUND SCAN</span>
+    </div>
+
+    <form method="POST" action="/classify" id="urlScanForm">
+        <div class="form-group">
+            <label for="scanUrlInput" class="form-label">Target URL for Threat Inspection</label>
+            <div style="position: relative;">
+                <input type="text" id="scanUrlInput" name="url" class="cyber-input" placeholder="https://example.com/secure-login" value="{{ url }}" required style="font-size: 1rem; padding: 14px 18px;">
+            </div>
+        </div>
+
+        <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+            <button type="submit" class="cyber-btn cyber-btn-primary" id="startScanBtn">
+                ⚡ START THREAT SCAN
+            </button>
+            <a href="/classify" class="cyber-btn" style="border-color: var(--border-medium);">
+                CLEAR
+            </a>
+        </div>
+    </form>
+
+    <!-- Interactive Scanning Progression Animation -->
+    <div class="scan-progress-hud" id="scanProgressHud" style="display: none;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; font-size: 0.82rem; color: var(--cyber-cyan);">
+            <span><strong>SCANNING TARGET URL IN PROGRESS...</strong></span>
+            <span class="status-dot cyan pulse"></span>
+        </div>
+        <div class="grid-3" style="gap: 8px;">
+            <div class="scan-progress-item"><span class="check">○</span> URL LENGTH & ENTROPY</div>
+            <div class="scan-progress-item"><span class="check">○</span> DOMAIN & TLD STRUCTURE</div>
+            <div class="scan-progress-item"><span class="check">○</span> IPv4 HOSTNAME INDICATORS</div>
+            <div class="scan-progress-item"><span class="check">○</span> SHORTENER DETECTION</div>
+            <div class="scan-progress-item"><span class="check">○</span> LURE KEYWORD ANALYSIS</div>
+            <div class="scan-progress-item"><span class="check">○</span> DELIMITERS & PATH DEPTH</div>
+        </div>
+    </div>
+</div>
+
+<!-- =========================================================================
+     CLASSIFICATION VERDICT & THREAT GAUGE PANEL
+     ========================================================================= -->
+{% if result %}
+<div class="hud-card hud-bracketed" style="margin-bottom: 24px; border-left: 4px solid {% if result.prediction == 'PHISHING' %}var(--cyber-red){% elif result.prediction == 'SUSPICIOUS' %}var(--cyber-amber){% else %}var(--cyber-green){% endif %};">
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; margin-bottom: 20px;">
+        <div>
+            <div style="font-family: var(--font-mono); font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px;">
+                SECURITY CLASSIFICATION VERDICT
+            </div>
+            <div style="margin-top: 6px;">
+                {% if result.prediction == 'PHISHING' %}
+                    <span class="cyber-badge badge-phishing" style="font-size: 1.15rem; padding: 8px 20px;">
+                        ⚠️ PHISHING DETECTED (CRITICAL RISK)
+                    </span>
+                {% elif result.prediction == 'SUSPICIOUS' %}
+                    <span class="cyber-badge badge-suspicious" style="font-size: 1.15rem; padding: 8px 20px;">
+                        ⚠️ SUSPICIOUS (MEDIUM RISK)
+                    </span>
+                {% else %}
+                    <span class="cyber-badge badge-safe" style="font-size: 1.15rem; padding: 8px 20px;">
+                        ✓ LEGITIMATE (SAFE)
+                    </span>
+                {% endif %}
+            </div>
+        </div>
+
+        <div style="display: flex; gap: 24px; flex-wrap: wrap;">
+            <div>
+                <div style="font-family: var(--font-mono); font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase;">
+                    RISK LEVEL
+                </div>
+                <div style="font-size: 1.35rem; font-weight: 800; color: {% if result.risk_level == 'HIGH' %}var(--cyber-red){% elif result.risk_level == 'MEDIUM' %}var(--cyber-amber){% else %}var(--cyber-green){% endif %};">
+                    {{ result.risk_level }}
+                </div>
+            </div>
+
+            <div>
+                <div style="font-family: var(--font-mono); font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase;">
+                    MODEL CONFIDENCE
+                </div>
+                <div style="font-family: var(--font-mono); font-size: 1.35rem; font-weight: 800; color: var(--cyber-cyan);">
+                    {{ (result.confidence * 100)|round(1) }}%
+                </div>
+            </div>
+
+            {% if result.phishing_probability is defined %}
+            <div>
+                <div style="font-family: var(--font-mono); font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase;">
+                    MALICIOUS PROB
+                </div>
+                <div style="font-family: var(--font-mono); font-size: 1.35rem; font-weight: 800; color: var(--cyber-red);">
+                    {{ (result.phishing_probability * 100)|round(1) }}%
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Target URL Inspector Box -->
+    <div style="background: var(--bg-input); border: 1px solid var(--border-subtle); padding: 14px 18px; border-radius: var(--radius-sm); margin-bottom: 20px; font-family: var(--font-mono); font-size: 0.95rem; word-break: break-all;">
+        <span style="color: var(--text-muted);">TARGET_URL: </span><span style="color: var(--text-primary);">{{ result.url }}</span>
+    </div>
+
+    <!-- Visual Risk Meter Gauge -->
+    <div class="risk-meter-wrap">
+        <div class="risk-meter-header">
+            <span>THREAT PROBABILITY SCORE</span>
+            <span>
+                {% if result.phishing_probability is defined %}
+                    {{ (result.phishing_probability * 100)|round(1) }} / 100
+                {% else %}
+                    {{ (result.confidence * 100)|round(1) }} / 100
+                {% endif %}
+            </span>
+        </div>
+        <div class="risk-meter-track">
+            {% set prob = (result.phishing_probability * 100) if result.phishing_probability is defined else (100 - result.confidence * 100 if result.prediction == 'SAFE' else result.confidence * 100) %}
+            <div class="risk-meter-bar {% if prob >= 65 %}high{% elif prob >= 35 %}medium{% else %}low{% endif %}" style="width: {{ prob }}%;"></div>
+        </div>
+        <div class="risk-meter-legend">
+            <span>0% (SAFE)</span>
+            <span>35% (SUSPICIOUS THRESHOLD)</span>
+            <span>65% (PHISHING THRESHOLD)</span>
+            <span>100% (CRITICAL)</span>
+        </div>
+    </div>
+
+    <!-- Automated Defense Action Card for Suspicious/Phishing URLs -->
+    {% if result.prediction in ['PHISHING', 'SUSPICIOUS'] %}
+    <div style="background: rgba(244, 63, 94, 0.08); border: 1px solid rgba(244, 63, 94, 0.25); border-radius: var(--radius-sm); padding: 18px; margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px;">
+        <div>
+            <strong style="color: var(--cyber-red); font-family: var(--font-mono); font-size: 0.95rem;">
+                🚨 AUTOMATED DEFENSE PROTOCOL TRIGGERED:
+            </strong>
+            <p style="font-size: 0.88rem; color: var(--text-secondary); margin-top: 4px;">
+                This destination has been classified as suspect. Route it into the controlled Honeypot Decoy to capture attacker telemetry, or queue it for human-in-the-loop analyst feedback.
+            </p>
+        </div>
+        <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+            <a href="/login?target={{ result.url|urlencode }}" class="cyber-btn cyber-btn-accent">
+                🪤 ROUTE TO HONEYPOT
+            </a>
+            <form action="/feedback" method="POST" style="margin: 0;">
+                <input type="hidden" name="action" value="add">
+                <input type="hidden" name="url" value="{{ result.url }}">
+                <input type="hidden" name="suggested_label" value="1">
+                <input type="hidden" name="notes" value="Flagged by URL Classifier (Confidence: {{ result.confidence }})">
+                <button type="submit" class="cyber-btn" style="border-color: var(--border-medium);">
+                    ➕ QUEUE TO FEEDBACK
+                </button>
+            </form>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- =====================================================================
+         EXTRACTED 20-FEATURE ML TELEMETRY PANEL
+         ===================================================================== -->
+    <div class="hud-card-header" style="margin-top: 10px;">
+        <div class="hud-card-title">
+            <span class="icon">🔬</span> ML FEATURE TELEMETRY (20 INDICATORS)
+        </div>
+        <span class="cyber-badge badge-cyan">ALIGNED WITH TRAINING</span>
+    </div>
+
+    <div class="table-responsive">
+        <table class="cyber-table">
+            <thead>
+                <tr>
+                    <th>Feature Key</th>
+                    <th>Extracted Telemetry</th>
+                    <th>Indicator Significance</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="cell-mono"><code>length</code></td>
+                    <td class="cell-mono">{{ result.features.length }}</td>
+                    <td>Total character length of the normalized URL string.</td>
+                </tr>
+                <tr>
+                    <td class="cell-mono"><code>entropy</code></td>
+                    <td class="cell-mono" style="color: var(--cyber-cyan);">{{ result.features.entropy }}</td>
+                    <td>Shannon entropy metric identifying algorithmic randomness or obscured host strings.</td>
+                </tr>
+                <tr>
+                    <td class="cell-mono"><code>is_ip</code></td>
+                    <td>
+                        {% if result.features.is_ip == 1 %}
+                            <span class="cyber-badge badge-phishing">YES (IPv4 Hostname)</span>
+                        {% else %}
+                            <span class="cyber-badge badge-safe">NO</span>
+                        {% endif %}
+                    </td>
+                    <td>Direct IP hostnames bypass reputation and DNS domain ownership checks.</td>
+                </tr>
+                <tr>
+                    <td class="cell-mono"><code>has_suspicious_keyword</code></td>
+                    <td>
+                        {% if result.features.has_suspicious_keyword == 1 %}
+                            <span class="cyber-badge badge-suspicious">DETECTED</span>
+                        {% else %}
+                            <span class="cyber-badge badge-safe">NONE</span>
+                        {% endif %}
+                    </td>
+                    <td>Matches typical lure tokens (<code>login</code>, <code>verify</code>, <code>banking</code>, <code>update</code>).</td>
+                </tr>
+                <tr>
+                    <td class="cell-mono"><code>has_https</code></td>
+                    <td class="cell-mono">{{ 'YES (1)' if result.features.has_https == 1 else 'NO (0)' }}</td>
+                    <td>Presence of encrypted HTTPS protocol scheme.</td>
+                </tr>
+                <tr>
+                    <td class="cell-mono"><code>has_at</code></td>
+                    <td class="cell-mono">{{ 'YES (1)' if result.features.has_at == 1 else 'NO (0)' }}</td>
+                    <td>Use of '@' symbol which tricks browsers into discarding preceding credential text.</td>
+                </tr>
+                <tr>
+                    <td class="cell-mono"><code>is_shortened</code></td>
+                    <td>
+                        {% if result.features.is_shortened == 1 %}
+                            <span class="cyber-badge badge-suspicious">SHORTENER</span>
+                        {% else %}
+                            <span class="cyber-badge badge-safe">DIRECT</span>
+                        {% endif %}
+                    </td>
+                    <td>Matches recognized URL redirection services (<code>bit.ly</code>, <code>tinyurl</code>, etc.).</td>
+                </tr>
+                <tr>
+                    <td class="cell-mono"><code>num_dots</code> / <code>num_subdomains</code></td>
+                    <td class="cell-mono">{{ result.features.num_dots }} dots / {{ result.features.num_subdomains }} subdomains</td>
+                    <td>Deep subdomain hierarchies mimicking authentic corporate portals.</td>
+                </tr>
+                <tr>
+                    <td class="cell-mono"><code>path_depth</code></td>
+                    <td class="cell-mono">{{ result.features.path_depth }}</td>
+                    <td>Count of nested directory path segments.</td>
+                </tr>
+                <tr>
+                    <td class="cell-mono"><code>num_special_chars</code></td>
+                    <td class="cell-mono">{{ result.features.num_special_chars }}</td>
+                    <td>Count of non-alphanumeric punctuation marks and delimiters.</td>
+                </tr>
+                <tr>
+                    <td class="cell-mono"><code>domain_length</code> / <code>path_length</code></td>
+                    <td class="cell-mono">{{ result.features.domain_length }} chars / {{ result.features.path_length }} chars</td>
+                    <td>Length of hostname authority vs. subordinate path segment.</td>
+                </tr>
+                <tr>
+                    <td class="cell-mono"><code>num_digits</code> / <code>num_hyphens</code></td>
+                    <td class="cell-mono">{{ result.features.num_digits }} digits / {{ result.features.num_hyphens }} hyphens</td>
+                    <td>Frequent lexical markers in randomized phishing kits.</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

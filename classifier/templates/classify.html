@@ -1,0 +1,87 @@
+<!doctype html>
+<html>
+<head>
+    <title>URL Classifier</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #f0f4c3, #ccff90); /* Light green gradient */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            color: #388e3c; /* Dark green text */
+        }
+
+        h2 {
+            font-size: 2.5rem;
+            color: #2e7d32; /* Darker green heading */
+            margin-bottom: 20px;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+        }
+
+        form {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        input[name="url"] {
+            padding: 12px;
+            font-size: 1rem;
+            border: 1px solid #8bc34a; /* Light green border */
+            border-radius: 6px;
+            flex-grow: 1;
+        }
+
+        button[type="submit"] {
+            background-color: #689f38; /* Olive green button */
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button[type="submit"]:hover {
+            background-color: #558b2f; /* Darker olive green on hover */
+        }
+
+        p {
+            font-size: 1.1rem;
+            color: #43a047; /* Another shade of green */
+            margin-bottom: 10px;
+        }
+
+        p a {
+            color: #1b5e20; /* Darkest green for link */
+            text-decoration: none;
+            font-weight: bold;
+            transition: color 0.3s ease;
+        }
+
+        p a:hover {
+            color: #2e7d32;
+        }
+    </style>
+</head>
+<body>
+    <h2>URL Classifier</h2>
+    <form method="post">
+        <input name="url" value="{{ url }}" placeholder="Enter URL">
+        <button type="submit">Check</button>
+    </form>
+    {% if result %}
+    <p>Result: {{ result }} (label={{ label }}, confidence={{ confidence }})</p>
+    {% endif %}
+    <p><a href="/">Home</a></p>
+</body>
+</html>

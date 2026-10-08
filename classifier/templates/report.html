@@ -1,0 +1,132 @@
+<!doctype html>
+<html>
+<head>
+    <title>Login Attempts Report</title>
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #455a64, #263238); /* Dark and sophisticated background */
+            color: #eceff1; /* Light text for contrast */
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        h2 {
+            font-size: 3rem;
+            color: #b0bec5; /* Light blue-gray heading */
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 95%;
+            max-width: 900px;
+            background-color: rgba(0, 0, 0, 0.6); /* Dark semi-transparent background */
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.5);
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 30px;
+        }
+
+        th, td {
+            padding: 15px 20px;
+            text-align: left;
+            border-bottom: 1px solid #607d8b; /* Darker border */
+        }
+
+        th {
+            background-color: #546e7a;
+            color: #fff;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        tr:nth-child(even) {
+            background-color: rgba(0, 0, 0, 0.4);
+        }
+
+        tr:hover {
+            background-color: rgba(0, 0, 0, 0.5);
+            transition: background-color 0.3s ease-in-out;
+        }
+
+        td a {
+            display: block;
+            color: #81d4fa; /* Light blue link */
+            text-decoration: none;
+            transition: color 0.3s ease-in-out;
+        }
+
+        td a:hover {
+            color: #4fc3f7;
+        }
+
+        p {
+            margin-top: 30px;
+        }
+
+        p a {
+            color: #81d4fa;
+            text-decoration: none;
+            font-weight: bold;
+            transition: color 0.3s ease-in-out;
+        }
+
+        p a:hover {
+            color: #4fc3f7;
+        }
+
+        /* Subtle animation for the heading */
+        h2 {
+            animation: fadeInHeading 1s ease-out;
+        }
+
+        @keyframes fadeInHeading {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Subtle animation for the table */
+        table {
+            animation: fadeInUpTable 0.8s ease-out;
+        }
+
+        @keyframes fadeInUpTable {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body>
+    <h2>Honeypot Login Attempts</h2>
+    <table>
+        <tr><th>Time</th><th>IP</th><th>User‑Agent</th><th>Username</th><th>Password</th></tr>
+        {% for a in attempts %}
+        <tr>
+            <td>{{ a.timestamp }}</td>
+            <td>{{ a.ip }}</td>
+            <td>{{ a.user_agent }}</td>
+            <td>{{ a.username }}</td>
+            <td>{{ a.password }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+    <p><a href="/">Home</a></p>
+</body>
+</html>

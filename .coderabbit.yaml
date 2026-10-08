@@ -1,0 +1,37 @@
+# CodeRabbit Configuration for Hybrid Phishing URL Trap
+# Schema: https://www.coderabbit.ai/integrations/schema.v2.json
+
+language: "en-US"
+tone_instructions: "You are a senior cybersecurity engineer and Python architect. Focus on defensive security guarantees, passive analysis safety, OWASP compliance, zero plaintext password leakage, and machine learning integrity."
+
+reviews:
+  profile: "assertive"
+  request_changes_workflow: false
+  high_level_summary: true
+  poem: false
+  review_status: true
+  collapse_walkthrough: false
+  auto_review:
+    enabled: true
+    drafts: false
+    ignore_title_keywords:
+      - "WIP"
+      - "draft"
+
+  path_filters:
+    - "!**/*.joblib"
+    - "!**/*.csv"
+    - "!**/*.pyc"
+    - "!**/venv/**"
+    - "!**/.pytest_cache/**"
+    - "!**/instance/*.db"
+
+  path_instructions:
+    - path: "src/features.py"
+      instructions: "Verify that feature extraction is strictly passive without outbound HTTP requests or DNS queries. Ensure malformed URLs and IP hostnames are parsed safely."
+    - path: "src/honeypot.py"
+      instructions: "Verify that submitted passwords are never stored in plaintext and only SHA-256 cryptographic fingerprints are logged."
+    - path: "src/database.py"
+      instructions: "Ensure 100% parameterized SQLite statements with zero string interpolation or SQL injection risk. Verify anti-poisoning status checks."
+    - path: "app.py"
+      instructions: "Ensure all endpoints validate user input types gracefully without crashing, enforce payload size thresholds, and maintain security headers."

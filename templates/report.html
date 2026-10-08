@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block title %}Intrusion Logs{% endblock %}
+{% block breadcrumb %}HONEYPOT INTRUSION LOGS{% endblock %}
+
+{% block content %}
+<div class="hud-card-header" style="margin-bottom: 24px;">
+    <div>
+        <h2 style="font-size: 1.6rem; font-weight: 800; letter-spacing: -0.5px;">
+            📋 Honeypot Intrusion Attempts Report
+        </h2>
+        <p style="color: var(--text-secondary); font-size: 0.88rem; margin-top: 4px;">
+            Legacy tabular audit view for recorded honeypot decoy interactions with cryptographic credential redaction.
+        </p>
+    </div>
+    <a href="/dashboard" class="cyber-btn cyber-btn-primary cyber-btn-sm">
+        VIEW FULL DASHBOARD &rarr;
+    </a>
+</div>
+
+<div class="hud-card hud-bracketed">
+    {% if attempts %}
+        <div class="table-responsive">
+            <table class="cyber-table">
+                <thead>
+                    <tr>
+                        <th>Time (UTC)</th>
+                        <th>Source IP</th>
+                        <th>User-Agent Signature</th>
+                        <th>Username Attempt</th>
+                        <th>Password Fingerprint (SHA-256)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for a in attempts %}
+                    <tr>
+                        <td class="cell-timestamp">{{ a.timestamp }}</td>
+                        <td class="cell-mono" style="color: var(--cyber-cyan);">{{ a.ip }}</td>
+                        <td class="cell-truncate" style="font-size: 0.78rem; color: var(--text-muted); max-width: 250px;">
+                            {{ a.user_agent }}
+                        </td>
+                        <td><strong style="color: var(--text-primary);">{{ a.username }}</strong></td>
+                        <td class="cell-mono" style="color: var(--text-muted);">
+                            {{ a.password }}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="empty-state">
+            <div class="empty-state-icon">📭</div>
+            <p>No login attempts recorded yet.</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
